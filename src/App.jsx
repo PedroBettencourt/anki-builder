@@ -1,33 +1,69 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useEffect, useState } from 'react'
+import { cards, card } from './App.module.css'
 
 function App() {
-  const [count, setCount] = useState(0)
+
+  const [input, setInput] = useState("");
+  const [term, setTerm] = useState(null);
+  const [translation, setTranslation] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
+
+  function handleInput(e) {
+    setInput(e.target.value);
+  };
+  
+  function handleSubmit(e) {
+    e.preventDefault();
+    setTerm(input);
+  };
+
+  useEffect(() => {
+    async function fetchTranslation() {
+      try {
+        const res = await fetch(`URL/${ term }`); // Develop backend for web scraping
+        console.log(res);
+        const json = await res.json();
+
+        console.log(json);
+
+      } catch(err) {
+        setError(err);
+
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    if (term) {
+      setError(null);
+      setIsLoading(true);
+      fetchTranslation();
+    }
+
+  }, [term]);
 
   return (
     <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
+      <h1>Anki Builder</h1>
+
+      <div className={ cards }>
+        <div className={ card }>
+          <h2>Card 1</h2>
+          <form onSubmit={ handleSubmit }>
+            <label htmlFor="term">Term</label>
+            <input type="text" id='term' name='term' value={ input } onChange={ handleInput } />
+            <button type="submit">Search</button>
+          </form>
+        </div>
+        <div className={ card }>
+          <h2>Card 2</h2>
+          { isLoading && <div>Translating...</div> }
+          { error && <div>Translation error </div> }
+          <p>{ term }</p>
+          <p>{ translation }</p>
+        </div>
       </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
     </>
   )
 }
