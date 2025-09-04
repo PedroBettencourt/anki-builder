@@ -21,21 +21,22 @@ index.get("/:word", async (req, res) => {
         const card = []; // Card with french word, definition, english translations, and examples
         let i = 0;
         for (const item of items) {
-            let frWord = $(item).find('td.FrWrd');
-            if (frWord.text()) {
+            let frWord = $(item).find('td.FrWrd').text();
+            if (frWord) {
                 if (i++ >= 2) break; // Only get the first two definitions
                 frWord = frWord.split(" "); // French word and class
                 card[i] = { frWord: frWord[0], class: frWord[1], def: null, engWord: [], example: null };
             }
-            
+
             const def = $(item).find('td:not([class])').text();
-            if (!card[i].def) card[i].def = def.replace(/^\(|\)/g, "");
+            let match = def.match(/^\((.*?)\)/); // Get the 1st definition and then [1] is without parentheses
+            if (match && !card[i].def) card[i].def = match[1];
 
             let engWord = $(item).find('td.ToWrd');
             if (engWord.text()) {
                 // remove the word class
                 $(engWord).contents().each((i, el) => { 
-                    if(el.type === 'text') engWord = $(el).text().trim() 
+                    if(el.type === 'text') engWord = $(el).text().trim() ;
                 });
                 card[i].engWord.push(engWord);
             }
@@ -51,9 +52,6 @@ index.get("/:word", async (req, res) => {
     }
     
 });
-
-
-// WEB SCRAP https://www.wordreference.com/fren/
 
 
 // // Send token
