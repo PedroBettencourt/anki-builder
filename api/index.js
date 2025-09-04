@@ -1,5 +1,5 @@
 const express = require('express');
-const { body, validationResult } = require("express-validator");
+const { param, validationResult } = require("express-validator");
 //const passport = require('passport');
 // const { sign } = require("jsonwebtoken");
 // const bcrypt = require("bcryptjs");
@@ -9,11 +9,10 @@ const axios = require("axios");
 
 const index = express.Router();
 
-// validate word first
 
-index.get("/:word", async (req, res) => {
-    try {
-        const response = await axios(`https://www.wordreference.com/fren/${req.params.word}`);
+// Get word card
+async function getCard(word) {
+    const response = await axios(`https://www.wordreference.com/fren/${word}`);
         const result = await response.data;
 
         const $ = cheerio.load(result);
@@ -25,12 +24,12 @@ index.get("/:word", async (req, res) => {
             if (frWord) {
                 if (i++ >= 2) break; // Only get the first two definitions
                 frWord = frWord.split(" "); // French word and class
-                card[i] = { frWord: frWord[0], class: frWord[1], def: null, engWord: [], example: null };
+                card[i - 1] = { frWord: frWord[0], class: frWord[1], def: null, engWord: [], example: null };
             }
 
             const def = $(item).find('td:not([class])').text();
             let match = def.match(/^\((.*?)\)/); // Get the 1st definition and then [1] is without parentheses
-            if (match && !card[i].def) card[i].def = match[1];
+            if (match && !card[i - 1].def) card[i - 1].def = match[1];
 
             let engWord = $(item).find('td.ToWrd');
             if (engWord.text()) {
@@ -38,19 +37,36 @@ index.get("/:word", async (req, res) => {
                 $(engWord).contents().each((i, el) => { 
                     if(el.type === 'text') engWord = $(el).text().trim() ;
                 });
-                card[i].engWord.push(engWord);
+                card[i - 1].engWord.push(engWord);
             }
 
             const example = $(item).find('td.FrEx').text();
-            if (example) card[i].example = example;
+            if (example) card[i - 1].example = example;
         }
+    return card;
+};
 
-        console.log(card);
+const validateWord = [
+    param("word")
+        .exists()
+        .trim()
+        .matches(/^[a-zA-Z]{1,}$/)
+        .withMessage("Invalid word!"),
+];
 
+index.get("/:word", validateWord, async (req, res) => {
+    // Validate word
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).json(errors);
+    };
+
+    try {
+        const card = await getCard(req.params.word);
+        res.status(200).json(card);
     } catch (err) {
-        console.error(err.message)
-    }
-    
+        res.status(400).json(err);
+    };
 });
 
 
