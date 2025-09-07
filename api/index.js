@@ -10,11 +10,12 @@ const axios = require("axios");
 const index = express.Router();
 
 
+// REVIEW THIS FOR VERBS (EX. DÉCOUVRIR)
+
 // Get word card
 async function getCard(word) {
     const response = await axios(`https://www.wordreference.com/fren/${word}`);
     const result = await response.data;
-    console.log(result);
 
     const $ = cheerio.load(result);
     const items = $('tr.odd, tr.even');
@@ -25,7 +26,7 @@ async function getCard(word) {
         if (frWord) {
             if (i++ >= 2) break; // Only get the first two definitions
             frWord = frWord.split(" "); // French word and class
-            card[i - 1] = { frWord: frWord[0], class: frWord[1], def: null, engWord: [], example: null };
+            card[i - 1] = { id: i - 1, frWord: frWord[0], class: frWord[1], def: null, engWord: [], example: null };
         }
 
         const def = $(item).find('td:not([class])').text();
@@ -51,7 +52,7 @@ const validateWord = [
     param("word")
         .exists()
         .trim()
-        .matches(/^[a-zA-Z]{1,}$/)
+        .matches(/^[A-zÀ-ÿ]{1,}$/)
         .withMessage("Invalid word!"),
 ];
 
