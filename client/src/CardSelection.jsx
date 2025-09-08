@@ -1,6 +1,6 @@
-import { card, selectedClass } from './Card.module.css'
+import { card, selectedClass } from './CardSelection.module.css'
 
-function Card({ item, dictionary, setDictionary }) {
+function CardSelection({ item, dictionary, setDictionary }) {
 
 
   function handleClick() {   
@@ -27,4 +27,4 @@ function Card({ item, dictionary, setDictionary }) {
   )
 }
 
-export default Card
+export default CardSelection

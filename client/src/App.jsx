@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react'
-import { cards } from './App.module.css'
-import Card from  './Card'
+import { cards, buttons } from './App.module.css'
+import CardSelection from  './CardSelection'
 import FinalCard from './FinalCard'
 
 function App() {
 
   const [input, setInput] = useState("");
-  const [word, setWord] = useState(null);
+  const [submit, setSubmit] = useState(false);
   const [dictionary, setDictionary] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -18,13 +18,13 @@ function App() {
   
   function handleSubmit(e) {
     e.preventDefault();
-    setWord(input);
+    setSubmit(true);
   };
 
   useEffect(() => {
-    async function fetchdictionary() {
+    async function fetchDictionary() {
       try {
-        const res = await fetch(`${ import.meta.env.VITE_URL }${ word }`); // Fetches from backend server
+        const res = await fetch(`${ import.meta.env.VITE_URL }${ input }`); // Fetches from backend server
         const json = await res.json();
         console.log(json)
         if (json.errors) setError(json.errors[0]);
@@ -40,13 +40,14 @@ function App() {
       }
     }
 
-    if (word) {
+    if (submit) {
       setError(null);
       setIsLoading(true);
-      fetchdictionary();
+      fetchDictionary();
+      setSubmit(false);
     }
 
-  }, [word]);
+  }, [submit]);
 
   function handleChoosing() {
     let chosen = dictionary.filter((item) => item['selected']);
@@ -70,7 +71,11 @@ function App() {
 
   function handleReturn() {
     setFinal(null);
-  }
+  };
+
+  function saveCard() {
+    // send data to backend where it is saved in a database
+  };
 
   return (
     <>
@@ -96,7 +101,7 @@ function App() {
           <h2>Select one or more</h2>
             <div className={ cards }>
               {dictionary.map(item => (
-              <Card key={ item.id } item={ item } dictionary={ dictionary } setDictionary={ setDictionary }/>
+              <CardSelection key={ item.id } item={ item } dictionary={ dictionary } setDictionary={ setDictionary }/>
               ))}
             </div>
             <button onClick={ handleChoosing }>Finalize Selection</button>
@@ -106,7 +111,10 @@ function App() {
         { final && 
           <>
             <FinalCard item={ final } /> 
-            <button onClick={ handleReturn }>Return</button>
+            <div className={ buttons }>
+              <button onClick={ handleReturn }>Return</button>
+              <button onClick={ saveCard }>Save Card</button>
+            </div>
           </>
         }
     </>

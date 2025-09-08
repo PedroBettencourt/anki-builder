@@ -1,0 +1,28 @@
+.cardDiv {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+}
+
+.card {
+  max-width: 400px;
+  width: 100%;
+  min-height: 50px;
+  background-color: #ffd0a3;
+  border: 2px solid #000000;
+  border-radius: 25px;
+  padding: 50px;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.card h2 {
+  margin: 0;
+  margin-bottom: -10px;
+}
+
+.card hr {
+  width: 100%;
+}
