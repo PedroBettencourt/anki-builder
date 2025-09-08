@@ -1,42 +1,7 @@
 import { useEffect, useState } from 'react'
-import { cards, card, selectedClass } from './App.module.css'
-
-function Card({ item, dictionary, setDictionary }) {
-
-  const [ selected, setSelected ] = useState(null);
-
-  function handleClick() {   
-    const temp = [... dictionary];
-
-    if (selected) {
-      setSelected(false);
-      temp[item.id]['selected'] = false;
-      setDictionary(temp);
-    } else {
-      setSelected(true);
-      temp[item.id]['selected'] = true;
-      setDictionary(temp);
-    }
-  }
-
-  return (
-    <ul onClick={ handleClick } className={ `${card} ${selected ? selectedClass : null}`} >
-      <li><h2>{ item.frWord }</h2></li>
-      <li><i>{ item.class }</i></li>
-      <li><strong>{ item.def }</strong></li>
-      <li>{ item.engWord.join(", ") }</li>
-      <li>{ item.example }</li>
-      { item.def2 && // Separate this to its own react function 
-      <>
-        <hr/>
-        <li><strong>{ item.def2 }</strong></li>
-        <li>{ item.engWord2.join(", ") }</li>
-        <li>{ item.example2 }</li>
-      </>
-      }
-    </ul>
-  )
-}
+import { cards } from './App.module.css'
+import Card from  './Card'
+import FinalCard from './FinalCard'
 
 function App() {
 
@@ -45,6 +10,7 @@ function App() {
   const [dictionary, setDictionary] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [final, setFinal] = useState(null); // Final card
 
   function handleInput(e) {
     setInput(e.target.value);
@@ -59,10 +25,11 @@ function App() {
     async function fetchdictionary() {
       try {
         const res = await fetch(`${ import.meta.env.VITE_URL }${ word }`); // Fetches from backend server
-        console.log(res);
         const json = await res.json();
-        setDictionary(json);
-        // deal with msg: [errors!] invalid word
+        console.log(json)
+        if (json.errors) setError(json.errors[0]);
+        else if (json.length == 0) setError({msg: "No word found!"})
+        else setDictionary(json);
 
       } catch(err) {
         console.error(err);
@@ -96,9 +63,14 @@ function App() {
         engWord2: chosen[1].engWord,
         example2: chosen[1].example,
       };
-    };
-    setDictionary([chosen]);
+    } else chosen = chosen[0];
+    
+    setFinal(chosen);
   };
+
+  function handleReturn() {
+    setFinal(null);
+  }
 
   return (
     <>
@@ -115,9 +87,11 @@ function App() {
             </>
         )}
         
-        { isLoading && <div>Translating...</div> }
-        { error && <div>dictionary error </div> }
-        { dictionary && 
+        { isLoading && <h3>Translating...</h3> }
+        { error && !error.msg && <h3>Dictionary Error. Please try again.</h3> }
+        { error && error.msg && <h3>{ error.msg } Please try again.</h3> }
+
+        { !final && dictionary && 
           <>
           <h2>Select one or more</h2>
             <div className={ cards }>
@@ -125,9 +99,16 @@ function App() {
               <Card key={ item.id } item={ item } dictionary={ dictionary } setDictionary={ setDictionary }/>
               ))}
             </div>
+            <button onClick={ handleChoosing }>Finalize Selection</button>
           </>
         }
-        <button onClick={ handleChoosing }>Selection done</button>
+
+        { final && 
+          <>
+            <FinalCard item={ final } /> 
+            <button onClick={ handleReturn }>Return</button>
+          </>
+        }
     </>
   )
 }
