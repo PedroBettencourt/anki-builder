@@ -1,10 +1,25 @@
+@font-face{
+  font-family: Nunito;
+  src: url('./assets/Nunito-VariableFont_wght.ttf');
+  font-style: normal;
+}
+
+@font-face {
+  font-family: Nunito;
+  src: url('./assets/Nunito-Italic-VariableFont_wght.ttf');
+  font-style: italic;
+}
+
 :root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+  font-family: Nunito, system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
 
-  background-color: #fff6de;
-  color: #000000;
+  --color-background: #fff6de;
+  --color-text: #000000;
+  --color-card: #ffd0a3;
+  --color-card2: red;
+  --color-buttons: #ffd03a;
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -27,6 +42,8 @@ body {
   place-items: center;
   min-width: 320px;
   min-height: 100vh;
+  background-color: var(--background-color);
+  color: var(--text-color);
 }
 
 h1 {
@@ -39,4 +56,11 @@ h1 {
   margin: 0 auto;
   padding: 2rem;
   text-align: center;
+}
+
+button {
+  padding: 10px;
+  background-color: var(--color-buttons);
+  border: 1px solid black;
+  border-radius: 10px;
 }

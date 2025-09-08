@@ -1,13 +1,15 @@
-.cardDiv {
-    width: 100%;
-    display: flex;
-    justify-content: center;
+.container {
+  width: 100%;
+  display: flex;
+  justify-content: center;
 }
 
 .card {
   max-width: 400px;
-  width: 100%;
-  min-height: 50px;
+  width: 50%;
+  height: 300px;
+  overflow-y: auto;  
+  overflow-x: hidden;
   background-color: #ffd0a3;
   border: 2px solid #000000;
   border-radius: 25px;
@@ -16,6 +18,7 @@
   display: flex;
   flex-direction: column;
   gap: 15px;
+  box-shadow: 0 0 5px 2px rgba(50, 50, 50, 0.25);
 }
 
 .card h2 {
@@ -25,4 +28,16 @@
 
 .card hr {
   width: 100%;
+}
+
+.card {
+  position: absolute;
+  transform-style: preserve-3d;
+  transition: transform 1s;
+  cursor: pointer;
+  backface-visibility: hidden;
+}
+
+.flip {
+  transform: rotateY(180deg);
 }

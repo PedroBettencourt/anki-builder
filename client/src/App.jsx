@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { cards, buttons } from './App.module.css'
+import { cards, buttons, finalClass } from './App.module.css'
 import CardSelection from  './CardSelection'
 import FinalCard from './FinalCard'
 
@@ -48,6 +48,10 @@ function App() {
     }
 
   }, [submit]);
+
+  function handleBack() {
+    setDictionary(null);
+  }
 
   function handleChoosing() {
     let chosen = dictionary.filter((item) => item['selected']);
@@ -104,14 +108,17 @@ function App() {
               <CardSelection key={ item.id } item={ item } dictionary={ dictionary } setDictionary={ setDictionary }/>
               ))}
             </div>
-            <button onClick={ handleChoosing }>Finalize Selection</button>
+            <div className={ buttons }>
+              <button onClick={ handleBack }>Return</button>
+              <button onClick={ handleChoosing }>Finalize Selection</button>
+            </div>
           </>
         }
 
         { final && 
           <>
             <FinalCard item={ final } /> 
-            <div className={ buttons }>
+            <div className={ `${buttons} ${finalClass}` } >
               <button onClick={ handleReturn }>Return</button>
               <button onClick={ saveCard }>Save Card</button>
             </div>
