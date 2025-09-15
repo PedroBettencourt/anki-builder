@@ -1,0 +1,46 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id Int @id @default(autoincrement())
+  username String @unique
+  cards Card[]
+}
+
+model Card {
+  id Int @id @default(autoincrement())
+  username User @relation(fields: [userId], references: [id])
+  userId Int
+  frWord String
+  wordClass String
+  def String
+  engWord Json
+  example String
+  def2 String?
+  engWord2 Json?
+  example2 String?
+
+  due DateTime            // Date when the card is next due for review
+  stability Float         // A measure of how well the information is retained
+  difficulty Int          // Reflects the inherent difficulty of the card content
+  elapsed_days Int        // Days since the card was last reviewed
+  scheduled_days Int      // The interval of time in days between this review and the next one
+  learning_steps Int      // Keeps track of the current step during the (re)learning stages
+  reps Int                // Total number of times the card has been reviewed
+  lapses Int              // Times the card was forgotten or remembered incorrectly
+  state Int               // The current state of the card (New, Learning, Review, Relearning)
+  last_review DateTime?   // The most recent review date, if applicable
+}
