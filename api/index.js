@@ -1,5 +1,8 @@
 const express = require('express');
-const { param, validationResult } = require("express-validator");
+const { body, param, validationResult } = require("express-validator");
+const { createEmptyCard, FSRS, Rating } = require("ts-fsrs");
+const db = require("./queries");
+
 //const passport = require('passport');
 // const { sign } = require("jsonwebtoken");
 // const bcrypt = require("bcryptjs");
@@ -8,7 +11,6 @@ const axios = require("axios");
 
 
 const index = express.Router();
-
 
 // REVIEW THIS FOR VERBS (EX. DÉCOUVRIR)
 
@@ -26,7 +28,7 @@ async function getCard(word) {
         if (frWord) {
             if (i++ >= 2) break; // Only get the first two definitions
             frWord = frWord.split(" "); // French word and class
-            card[i - 1] = { id: i - 1, frWord: frWord[0], class: frWord[1], def: null, engWord: [], example: null };
+            card[i - 1] = { id: i - 1, frWord: frWord[0], wordClass: frWord[1], def: null, engWord: [], example: null };
         }
 
         const def = $(item).find('td:not([class])').text();
@@ -69,6 +71,59 @@ index.get("/:word", validateWord, async (req, res) => {
     } catch (err) {
         res.status(400).json(err);
     };
+});
+
+
+// Save card
+const validateCard = [
+    body("frWord")
+        .exists().trim().matches(/^[A-zÀ-ÿ]{1,}$/).withMessage("Invalid french word!"),
+
+    body("wordClass")
+        .exists().trim().matches(/^[A-zÀ-ÿ]{1,}$/).withMessage("Invalid class!"),
+
+    body("def")
+        .exists().trim().matches(/^[A-zÀ-ÿ\s]{1,}$/).withMessage("Invalid definition!"),
+
+    body("engWord")
+        .exists().isArray().withMessage("There must be english words!"),
+    body("engWord.*")
+        .matches(/^[A-zÀ-ÿ\s]{1,}$/).withMessage("Invalid english words!"),
+
+    body("example")
+        .exists().trim().matches(/^[A-zÀ-ÿ\s]{1,}$/).withMessage("Invalid word!"),
+    
+    body("def2")
+        .matches(/^[A-zÀ-ÿ\s]*$/).withMessage("Invalid second definition!"),
+
+    body("engWord2.*")
+        .matches(/^[A-zÀ-ÿ\s]*$/).withMessage("Invalid second english words!"),
+
+    body("example2")
+        .matches(/^[A-zÀ-ÿ\s]*$/).withMessage("Invalid second example!"),
+];
+
+index.post("/newcard", validateCard, async(req, res) => {
+    // Validate card
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).json(errors);
+    };
+
+    const { frWord, wordClass, def, engWord, example, def2, engWord2, example2 } = req.body;
+
+    // Create fsrs card
+    const card = createEmptyCard();
+
+    // Add to the database
+    const dbCard = await db.addCard(
+        frWord, wordClass, def, engWord, example, def2, engWord2, example2, 
+        card.due, card.stability, card.difficulty, card.elapsed_days, card.scheduled_days, 
+        card.reps, card.lapses, card.learning_steps, card.state, card.last_review)
+
+    // Missing authentication to add to database -- temporarily adding to a testing user
+    
+    res.json(dbCard);
 });
 
 
